@@ -77,27 +77,54 @@ println() { printf '%s\n' "$*"; }
 err() { printf 'Error: %s\n' "$*" >&2; }
 
 usage() {
+  # ANSI colors
+  local BOLD="\033[1m"
+  local GREEN="\033[32m"
+  local CYAN="\033[36m"
+  local RESET="\033[0m"
+
   cat >&2 <<EOF
-Usage:
+${BOLD}snano - safe nano with automatic backups${RESET}
+
+${BOLD}Usage:${RESET}
   snano [--ttl HOURS] [-k|--keep] <file>
   snano --prune [--dry-run] [--force]
   snano --list
   snano --restore <backup_path> [--to <dest>] [--overwrite]
   snano --restore-latest <original_path> [--to <dest>] [--overwrite]
-Options:
-  --ttl HOURS      TTL for this backup (override default). 0 = never expire.
-  -k, --keep       Force keep backup (ignore TTL).
-  --prune          Remove expired backups (based on index).
-    --dry-run      Show what would be deleted, do not remove.
-    --force        Also remove backups with TTL=0.
-  --list           List all registered backups.
-  --restore        Restore from a backup path.
-  --restore-latest Restore the latest backup for an original file.
-  --to <dest>      Destination path for restore (default: original path).
-  --overwrite      Overwrite destination file if it exists.
+
+${BOLD}Options:${RESET}
+  ${CYAN}--ttl HOURS${RESET}       Set custom TTL for this backup (0 = never expire)
+  ${CYAN}-k, --keep${RESET}       Keep the backup permanently (ignore TTL)
+  ${CYAN}--prune${RESET}          Remove expired backups
+    ${CYAN}--dry-run${RESET}      Show what would be deleted, without removing
+    ${CYAN}--force${RESET}        Also remove permanent backups (TTL=0 or keep)
+  ${CYAN}--list${RESET}           List all registered backups
+  ${CYAN}--restore${RESET}        Restore from a specific backup path
+  ${CYAN}--restore-latest${RESET} Restore the latest backup for a given file
+  ${CYAN}--to <dest>${RESET}      Restore destination (default: original path)
+  ${CYAN}--overwrite${RESET}      Overwrite destination if it already exists
+  ${CYAN}-h, --help${RESET}       Show this help message
+
+${BOLD}Examples:${RESET}
+  ${GREEN}snano notes.txt${RESET}
+      Open "notes.txt" with backup before editing
+
+  ${GREEN}snano --ttl 72 project.conf${RESET}
+      Backup with a custom TTL of 72 hours
+
+  ${GREEN}snano --list${RESET}
+      Show all tracked backups
+
+  ${GREEN}snano --prune --dry-run${RESET}
+      Preview which expired backups would be deleted
+
+  ${GREEN}snano --restore-latest ~/config.yaml --to ~/restore.yaml${RESET}
+      Restore the latest backup of config.yaml to a new file
 EOF
   exit 2
 }
+
 
 # --- Backup path generator --------------------------------------------------
 backup_path_for() {
