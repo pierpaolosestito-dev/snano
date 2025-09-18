@@ -1,0 +1,6 @@
+[Unit]
+Description=snano prune
+
+[Service]
+Type=oneshot
+ExecStart=%h/bin/snano --prune
